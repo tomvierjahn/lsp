@@ -1584,9 +1584,10 @@ static size_t lsp_normalize_count(const char *raw, size_t raw_len, size_t length
  *
  * SGR sequences are also recognized and ignored.
  *
- * Note: this function returns data that is _not_ null-terminated, i.e. no
- *       string.  This would be meaningless, because the normalized data itself
- *       can contain null-characters.
+ * Because we need to be able to run regexec(3) on the results of this function,
+ * the returned data will be null-terminated, i.e. it looks like a string.
+ * But when we have to deal with binary input, that string itself can
+ * contain null-characters!
  */
 static char *lsp_normalize(const char *raw, size_t raw_len, size_t *n_length)
 {
@@ -1596,9 +1597,10 @@ static char *lsp_normalize(const char *raw, size_t raw_len, size_t *n_length)
 	size_t i;
 
 	/* We should be allocating too much memory, because the worst we do is
-	   to ignore characters from the raw data.
-	   We correct the allocated size below. */
-	normalized = lsp_malloc(raw_len);
+	 * that we _ignore_ characters from the raw data;
+	 * we correct the allocated size below.
+	 */
+	normalized = lsp_malloc(raw_len + 1);
 
 	/* Copy the data ignoring c\b sequences */
 	for (i = 0, nlen = 0; i < raw_len; i += ch_len) {
@@ -1613,11 +1615,12 @@ static char *lsp_normalize(const char *raw, size_t raw_len, size_t *n_length)
 		/* Append the char to normalized data. */
 		memcpy(normalized + nlen, raw + i, ch_len);
 		nlen += ch_len;
+		normalized[nlen] = '\0';
 	}
 
 	/* Adjust the allocated memory to the correct size */
 	if (raw_len > nlen)
-		normalized = lsp_realloc(normalized, nlen);
+		normalized = lsp_realloc(normalized, nlen + 1);
 
 	/* ...or error out if our heuristics failed. */
 	if (raw_len < nlen)
