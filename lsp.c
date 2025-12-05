@@ -1674,28 +1674,43 @@ static void lsp_file_close()
 	/*
 	 * Wait for child to exit().
 	 */
+	lsp_debug("%s(%s): waiting for child %jd...", __func__, cf->name,
+		  (intmax_t)cf->child_pid);
+
 	while (1) {
 		int wstatus;
 
 		pid_t ret_pid = waitpid(cf->child_pid, &wstatus, 0);
 
-		if (ret_pid == -1)
-			lsp_error("waitpid(%jd): %s",
-				  (intmax_t)cf->child_pid, strerror(errno));
+		if (ret_pid == -1) {
+			if (errno == EINTR) {
+				lsp_debug("%s(%s): restarting interrupted waitpid().",
+					  __func__, cf->name);
+				continue;
+			} else
+				lsp_error("waitpid(%jd): %s",
+					  (intmax_t)cf->child_pid, strerror(errno));
+		}
+
+		if (ret_pid == 0) {
+			lsp_debug("%s(%s): waiting again for child %jd.",
+				  __func__, cf->name, (intmax_t)cf->child_pid);
+			continue;
+		}
 
 		if (WIFEXITED(wstatus)) {
-			lsp_debug("%s: child %jd exited: %d",
-				  __func__, (intmax_t)cf->child_pid,
+			lsp_debug("%s(%s): child %jd exited: %d",
+				  __func__, cf->name, (intmax_t)cf->child_pid,
 				  WEXITSTATUS(wstatus));
 			break;
 		} else if (WIFSIGNALED(wstatus)) {
-			lsp_debug("%s: child %jd terminated by signal: %d (%s)",
-				  __func__, (intmax_t)cf->child_pid,
+			lsp_debug("%s(%s): child %jd terminated by signal: %d (%s)",
+				  __func__, cf->name, (intmax_t)cf->child_pid,
 				  WTERMSIG(wstatus), strsignal(WTERMSIG(wstatus)));
 			break;
 		}
-		lsp_debug("%s: %jd: still waiting for child %jd to exit...",
-			  __func__, (intmax_t)ret_pid, (intmax_t)cf->child_pid);
+		lsp_debug("%s(%s): %jd: still waiting for child %jd to exit...",
+			  __func__, cf->name, (intmax_t)ret_pid, (intmax_t)cf->child_pid);
 	}
 
 	cf->child_pid = 0;
@@ -5371,6 +5386,8 @@ static void lsp_start_feeder(lsp_feeder_t which_one)
 	}
 
 	/* parent process */
+	lsp_debug("%s: forked new child with pid %jd.", __func__, cf->child_pid);
+
 	cf->fd = ptmxfd;
 	cf->size = LSP_FSIZE_UNKNOWN;
 
@@ -6800,6 +6817,8 @@ static void lsp_file_add(char *name, bool new_current)
 			cf = new_file;
 		return;
 	}
+
+	lsp_debug("%s: adding new file \"%s\".", __func__, name);
 
 	new_file = lsp_file_ctor();
 
