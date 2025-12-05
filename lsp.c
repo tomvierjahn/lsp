@@ -5388,6 +5388,15 @@ static void lsp_start_feeder(lsp_feeder_t which_one)
 	/* parent process */
 	lsp_debug("%s: forked new child with pid %jd.", __func__, cf->child_pid);
 
+	/*
+	 * Set FD_CLOEXEC for the pty file descriptor so that future childs
+	 * don't keep it open accross execvp()s.
+	 *
+	 * We want to ensure that we are the only process that has the fd open
+	 * and a later close(2) has the wanted effect, that the child exits.
+	 */
+	lsp_set_cloexec(ptmxfd);
+
 	cf->fd = ptmxfd;
 	cf->size = LSP_FSIZE_UNKNOWN;
 
