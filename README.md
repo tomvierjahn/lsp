@@ -285,6 +285,15 @@ Commands
        SPACE
               Forward one page in file.
 
+       left button click
+
+              • show cursor at marked position in normal mode
+
+              • mark active line in TOC mode
+
+       left button double-click
+              in TOC mode: go to clicked position in original file
+
        ENTER
               Depends on the active mode:
 
@@ -391,5 +400,5 @@ See Also
 Bugs
        Report bugs at https://github.com/dgouders/lsp
 
-0.5.0-rc5                         04/13/2025                            lsp(1)
+0.6.0                             12/06/2025                            lsp(1)
 ```
