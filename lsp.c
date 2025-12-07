@@ -1633,24 +1633,6 @@ static char *lsp_normalize(const char *raw, size_t raw_len, size_t *n_length)
 }
 
 /*
- * Do a normalization and return the result as a string.
- */
-static char *lsp_normalize2str(const char *raw, size_t raw_len) {
-	size_t norm_len;
-	char *norm;
-	char *str;
-
-	/* Normalize the data up to the given length. */
-	norm = lsp_normalize(raw, raw_len, &norm_len);
-
-	/* Tranform it to a string. */
-	str = lsp_mdup2str(norm, norm_len);
-
-	free(norm);
-	return str;
-}
-
-/*
  * Close the input fd for current_file.
  */
 static void lsp_file_close()
@@ -3789,7 +3771,7 @@ static struct gref_t *lsp_get_gref_at_pos(regmatch_t pos)
 	char *ref_start = line->raw + (pos.rm_so - line->pos);
 
 	char *ref_name =
-		lsp_normalize2str(ref_start, pos.rm_eo - pos.rm_so);
+		lsp_normalize(ref_start, pos.rm_eo - pos.rm_so, NULL);
 
 	/* Create gref or get existing one. */
 	struct gref_t *gref = lsp_gref_search(ref_name);

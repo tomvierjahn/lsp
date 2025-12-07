@@ -342,7 +342,6 @@ static void			lsp_mode_unset_highlight(void);
 static void			lsp_mode_unset_search_or_refs(void);
 static void			lsp_mode_unset_toc(void);
 static char *			lsp_normalize(const char *, size_t, size_t*);
-static char *			lsp_normalize2str(const char *, size_t);
 static size_t			lsp_normalize_count(const char *, size_t, size_t);
 static void			lsp_open_cterm(void);
 static int			lsp_open_file(const char *);
