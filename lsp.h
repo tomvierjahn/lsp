@@ -200,6 +200,7 @@ typedef enum lsp_feeder {
 static void			lsp_apropos_create_grefs(void);
 static void			lsp_argv_dtor(char **);
 static int			lsp_argv_size(char **);
+static bool			lsp_basename_is_equal(const char *, const char *);
 static void			lsp_become_a_cat(char **) lsp_attr_noreturn;
 static size_t			lsp_buffer_free_size(void);
 static void *			lsp_calloc(size_t, size_t);
@@ -353,6 +354,7 @@ static void			lsp_mode_toggle_highlight(void);
 static void			lsp_mode_unset_highlight(void);
 static void			lsp_mode_unset_search_or_refs(void);
 static void			lsp_mode_unset_toc(void);
+static unsigned int		lsp_ndigits(unsigned int);
 static char *			lsp_normalize(const char *, size_t, size_t*);
 static size_t			lsp_normalize_count(const char *, size_t, size_t);
 static void			lsp_open_cterm(void);
