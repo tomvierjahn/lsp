@@ -48,6 +48,12 @@
 #  define lsp_attr_alloc_size_2(a, b)
 #endif
 
+#if lsp_has_attribute(const)
+#  define lsp_attr_const __attribute__ ((const))
+#else
+#  define lsp_attr_const
+#endif
+
 /*
  * We store each file's content in a ring of buffers of size blksize.
  */
@@ -332,8 +338,8 @@ static void			lsp_init_logfile(void);
 static int			lsp_init_screen(void);
 static void			lsp_init_256_colors(void);
 static void			lsp_invalidate_cm_cursor(void);
-static bool			lsp_is_a_match(regmatch_t) lsp_attr_pure;
-static bool			lsp_is_no_match(regmatch_t) lsp_attr_pure;
+static bool			lsp_is_a_match(regmatch_t) lsp_attr_const;
+static bool			lsp_is_no_match(regmatch_t) lsp_attr_const;
 static bool			lsp_is_readable(char *);
 static bool			lsp_is_sgr_sequence(const char *);
 static void			lsp_line_add_wlines(struct lsp_line_t *);
@@ -368,7 +374,7 @@ static void			lsp_mode_toggle_highlight(void);
 static void			lsp_mode_unset_highlight(void);
 static void			lsp_mode_unset_search_or_refs(void);
 static void			lsp_mode_unset_toc(void);
-static unsigned int		lsp_ndigits(unsigned int) lsp_attr_pure;
+static unsigned int		lsp_ndigits(unsigned int) lsp_attr_const;
 static char *			lsp_normalize(const char *, size_t, size_t*);
 static size_t			lsp_normalize_count(const char *, size_t, size_t);
 static void			lsp_open_cterm(void);
