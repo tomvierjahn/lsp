@@ -332,8 +332,17 @@ static void lsp_file_ungetch()
  */
 static void lsp_goto_bol()
 {
-	while (lsp_pos > 0 && lsp_file_peek_bw() != '\n')
+	int ret;
+	char ch;
+
+	while (lsp_pos > 0) {
+		ret = lsp_file_peek_bw(&ch);
+
+		if (ret == -1 || ch == '\n')
+			break;
+
 		lsp_file_ungetch();
+	}
 }
 
 /*
@@ -780,7 +789,13 @@ static bool lsp_file_is_at_bol()
 {
 	/* We define the beginning of a file to be the beginning of
 	   a (the first) line, as well. */
-	return lsp_pos <= 0 || lsp_file_peek_bw() == '\n' || lsp_pos == cf->size;
+	if (lsp_pos <= 0 || lsp_pos == cf->size)
+		return true;
+
+	char ch;
+	int ret = lsp_file_peek_bw(&ch);
+
+	return ret == -1 || ch == '\n';
 }
 
 /*
@@ -1100,46 +1115,53 @@ static struct lsp_line_t *lsp_file_get_prev_line()
  */
 static void lsp_file_set_prev_line()
 {
-	int ch;
+	char ch;
+	int ret;
 
 	/* First go to beginning of this line */
 	lsp_goto_bol();
 
 	do {
 		lsp_file_ungetch();
-		ch = lsp_file_peek_bw();
-	} while (ch != '\n' && ch != -1);
+		ret = lsp_file_peek_bw(&ch);
+	} while (ret != -1 && ch != '\n');
 
 }
 
 /*
  * Peek forward to the next byte that getch() would give us.
+ * Return 0 or -1 on EOF.
  */
-static int lsp_file_peek_fw()
+static int lsp_file_peek_fw(char *ret_ch)
 {
-       int ch = lsp_file_getch();
-       if (ch != -1)
-               lsp_file_ungetch();
-       return ch;
+	int ret = lsp_file_getch(ret_ch);
+
+	if (ret != -1)
+		lsp_file_ungetch();
+
+	return ret;
 }
 
 /*
  * What was the last byte again?
+ * Provide that byte in ret_ch.
+ * Return 0 on success, -1 on failure (beginning of file reached).
  */
-static int lsp_file_peek_bw()
+static int lsp_file_peek_bw(char *ret_ch)
 {
 	if (lsp_pos <= 0)
 		return -1;	/* Beginning of file */
 
 	lsp_file_set_pos(lsp_pos - 1);
 
-	return lsp_file_getch();
+	return lsp_file_getch(ret_ch);
 }
 
 /*
- * Get the next byte from current file or -1 on EOF.
+ * Provide the next byte from current file in ret_ch.
+ * Return 0 on success or -1 on EOF.
  */
-static int lsp_file_getch()
+static int lsp_file_getch(char *ret_ch)
 {
 	/* We use internal recursion but the maximum depth should be 1.
 	   Otherwise we don't understand what we are doing. */
@@ -1165,7 +1187,8 @@ again:
 		off_t i = lsp_pos % cf->blksize;
 		cf->getch_pos += 1;
 		once = 0;
-		return cf->data->buffer[i];
+		*ret_ch = cf->data->buffer[i];
+		return 0;
 	} else {
 		/* Read next block from file. */
 		lsp_file_add_block();
@@ -1484,6 +1507,8 @@ static struct lsp_line_t *lsp_get_line_from_here()
 	size_t size = 0;
 	char *str = NULL;
 	struct lsp_line_t *line = NULL;
+	char ch;
+	int ret;
 
 	/* Return NULL if we reached EOF. */
 	if (cf->size != LSP_FSIZE_UNKNOWN &&
@@ -1493,8 +1518,8 @@ static struct lsp_line_t *lsp_get_line_from_here()
 	pos = lsp_pos;
 
 	/* Don't return a line for a trailing newline in the file. */
-	int ch = lsp_file_getch();
-	if (ch == -1)
+	ret = lsp_file_getch(&ch);
+	if (ret == -1)
 		return NULL;
 
 	line = lsp_line_ctor();
@@ -1504,7 +1529,7 @@ static struct lsp_line_t *lsp_get_line_from_here()
 	size = 128;
 	str = lsp_malloc(size);
 
-	while (ch != -1) {
+	while (ret != -1) {
 		if (pos + 1 >= size) {
 			str = lsp_realloc(str, size * 2);
 			size *= 2;
@@ -1515,7 +1540,7 @@ static struct lsp_line_t *lsp_get_line_from_here()
 		if (ch == '\n')
 			break;
 
-		ch = lsp_file_getch();
+		ret = lsp_file_getch(&ch);
 	}
 
 	/* Reallocate to correct size */
@@ -1534,7 +1559,7 @@ static struct lsp_line_t *lsp_get_line_from_here()
 	 * be the last one on a page.
 	 */
 	if (cf->size == LSP_FSIZE_UNKNOWN)
-		lsp_file_peek_fw();
+		lsp_file_peek_fw(&ch);
 
 	return line;
 }
@@ -4933,11 +4958,12 @@ static void lsp_cmd_forward(int n)
 		/* read forward n lines */
 		int i = 0;
 		while (i < n) {
-			int ch = lsp_file_getch();
+			char ch;
+			int ret = lsp_file_getch(&ch);
+			if (ret == -1)
+				break;
 			if (ch == '\n')
 				i++;
-			if (ch == -1)
-				break;
 		}
 	} else
 		/* read forward n window lines */
