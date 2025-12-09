@@ -22,6 +22,18 @@
 #define LSP_STRN_EQ(a, b, l) (strncmp(a, b, l) == 0)
 #define LSP_STRN_NEQ(a, b, l) (strncmp(a, b, l) != 0)
 
+#if defined __has_attribute
+#  define lsp_has_attribute(x) __has_attribute(x)
+#else
+#  define lsp_has_attribute(x) 0
+#endif
+
+#if lsp_has_attribute(noreturn)
+#  define lsp_attr_noreturn __attribute__ ((noreturn))
+#else
+#  define lsp_attr_noreturn
+#endif
+
 /*
  * We store each file's content in a ring of buffers of size blksize.
  */
@@ -188,7 +200,7 @@ typedef enum lsp_feeder {
 static void			lsp_apropos_create_grefs(void);
 static void			lsp_argv_dtor(char **);
 static int			lsp_argv_size(char **);
-static void			lsp_become_a_cat(char **) __attribute__ ((noreturn));
+static void			lsp_become_a_cat(char **) lsp_attr_noreturn;
 static size_t			lsp_buffer_free_size(void);
 static void *			lsp_calloc(size_t, size_t);
 static bool			lsp_cm_cursor_is_valid(void);
@@ -227,7 +239,7 @@ static size_t			lsp_decode_sgr(const char *, attr_t *, short *);
 static char *			lsp_detect_manpage(bool);
 static void			lsp_display_page(void);
 static char **			lsp_env2argv(char *);
-static int			lsp_error(const char *, ...) __attribute__ ((noreturn));
+static int			lsp_error(const char *, ...) lsp_attr_noreturn;
 static int			lsp_expand_tab(size_t);
 static void			lsp_file_add(char *, bool);
 static void			lsp_file_add_block(void);
@@ -277,7 +289,7 @@ static void			lsp_file_set_prev_line(void);
 static void			lsp_file_set_size(void);
 static void			lsp_file_toc_add(const struct lsp_line_t *, int);
 static void			lsp_file_ungetch(void);
-static void			lsp_finish(void) __attribute__ ((noreturn));
+static void			lsp_finish(void) lsp_attr_noreturn;
 static size_t			lsp_fread(void *, size_t, size_t, FILE *);
 static short			lsp_get_color_pair(short, short);
 static struct gref_t *		lsp_get_gref_at_pos(regmatch_t);
