@@ -40,6 +40,14 @@
 #  define lsp_attr_pure
 #endif
 
+#if lsp_has_attribute(alloc_size)
+#  define lsp_attr_alloc_size_1(a) __attribute__ ((alloc_size(a)))
+#  define lsp_attr_alloc_size_2(a, b) __attribute__ ((alloc_size(a, b)))
+#else
+#  define lsp_attr_alloc_size_1(a)
+#  define lsp_attr_alloc_size_2(a, b)
+#endif
+
 /*
  * We store each file's content in a ring of buffers of size blksize.
  */
@@ -209,7 +217,7 @@ static int			lsp_argv_size(char **);
 static bool			lsp_basename_is_equal(const char *, const char *) lsp_attr_pure;
 static void			lsp_become_a_cat(char **) lsp_attr_noreturn;
 static size_t			lsp_buffer_free_size(void);
-static void *			lsp_calloc(size_t, size_t);
+static void *			lsp_calloc(size_t, size_t) lsp_attr_alloc_size_2(1, 2);
 static bool			lsp_cm_cursor_is_valid(void);
 static void			lsp_cmd_apropos(void);
 static void			lsp_cmd_backward(int);
@@ -337,7 +345,7 @@ static int			lsp_line_handle_leading_sgr(attr_t *, short *);
 static size_t			lsp_line_get_matches(const struct lsp_line_t *, regmatch_t **);
 static regmatch_t		lsp_line_get_last_match(struct lsp_line_t **);
 static void			lsp_lines_add(off_t);
-static void *			lsp_malloc(size_t);
+static void *			lsp_malloc(size_t) lsp_attr_alloc_size_1(1);
 static char *			lsp_man_get_section(off_t);
 static int			lsp_man_goto_section(char *);
 static struct man_id		lsp_man_id_ctor(const char *);
@@ -390,7 +398,7 @@ static void			lsp_print_argv(char **);
 #endif
 static void			lsp_process_env_open(void);
 static char *			lsp_read_manpage_name(void);
-static void *			lsp_realloc(void *, size_t);
+static void *			lsp_realloc(void *, size_t) lsp_attr_alloc_size_1(2);
 static bool			lsp_ref_is_valid(struct gref_t *);
 static void			lsp_remove_bs_from_string(char *);
 static void			lsp_wline_bw(int);
