@@ -884,7 +884,7 @@ static void lsp_toc_ctor()
 		}
 
 		/* Level 2: all lines starting with seven spaces and
-		            their following line with indentation of
+			    their following line with indentation of
 			    at least eleven spaces. */
 		if (line->nlen > 11 &&
 		    LSP_STRN_EQ(line->normalized, "       ", 7) &&
@@ -1391,7 +1391,7 @@ static void lsp_line_add_wlines(struct lsp_line_t *line)
 
 	size_t i = 0;		/* current byte in the line */
 	size_t ch_len;
-	int current_col = 0;    /* current column in one window line */
+	int current_col = 0;	/* current column in one window line */
 	size_t wli = 0;		/* wline index */
 	char new_wline = 0;	/* to identify parts containing just a newline */
 
@@ -4089,9 +4089,9 @@ static size_t lsp_line_get_matches(const struct lsp_line_t *line, regmatch_t **p
 		/* Compute offsets for raw data, because it is the
 		   one that we need to do highlighting for. */
 		(*pmatch)[i].rm_so = lsp_normalize_count(line->raw, line->len,
-						       (*pmatch)[i].rm_so);
+							 (*pmatch)[i].rm_so);
 		(*pmatch)[i].rm_eo = lsp_normalize_count(line->raw, line->len,
-						       (*pmatch)[i].rm_eo);
+							 (*pmatch)[i].rm_eo);
 
 		/* For references: only mark valid ones. */
 		if (cf->regex_p == lsp_refs_regex) {

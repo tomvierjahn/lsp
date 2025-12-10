@@ -64,8 +64,8 @@
  * We store each file's content in a ring of buffers of size blksize.
  */
 struct data_t {
-	off_t seek;	       // position of buffer inside the file
-	unsigned char *buffer; // the content
+	off_t seek;		// position of buffer inside the file
+	unsigned char *buffer;	// the content
 	struct data_t *prev;
 	struct data_t *next;
 };
@@ -127,7 +127,7 @@ struct lsp_line_t {
 	char *normalized;	/* normalized content */
 
 	size_t n_wlines;	/* number of window lines */
-	off_t *wlines;   	/* pointers to offsets in raw that
+	off_t *wlines;		/* pointers to offsets in raw that
 				 * correspond to lines in the window */
 };
 
@@ -219,7 +219,7 @@ char *lsp_restartable[] = {"git", "man", NULL};
 
 typedef enum lsp_feeder {
 	LSP_MAN_COMMAND = 1,	/* use man(1) to start a feeder */
-	LSP_PARENT_COMMAND 	/* use parent cmdline to start a feeder */
+	LSP_PARENT_COMMAND	/* use parent cmdline to start a feeder */
 } lsp_feeder_t;
 
 
@@ -230,7 +230,7 @@ static bool			lsp_basename_is_equal(const char *, const char *) lsp_attr_pure;
 static void			lsp_become_a_cat(char **) lsp_attr_noreturn;
 static size_t			lsp_buffer_free_size(void);
 static void *			lsp_calloc(size_t, size_t) lsp_attr_alloc_size_2(1, 2)
-							   lsp_attr_wur;
+								lsp_attr_wur;
 static bool			lsp_cm_cursor_is_valid(void);
 static void			lsp_cmd_apropos(void);
 static void			lsp_cmd_backward(int);
@@ -360,7 +360,7 @@ static size_t			lsp_line_get_matches(const struct lsp_line_t *, regmatch_t **);
 static regmatch_t		lsp_line_get_last_match(struct lsp_line_t **);
 static void			lsp_lines_add(off_t);
 static void *			lsp_malloc(size_t) lsp_attr_alloc_size_1(1)
-						   lsp_attr_wur;
+							lsp_attr_wur;
 static char *			lsp_man_get_section(off_t) lsp_attr_wur;
 static int			lsp_man_goto_section(char *);
 static struct man_id		lsp_man_id_ctor(const char *);
@@ -414,7 +414,7 @@ static void			lsp_print_argv(char **);
 static void			lsp_process_env_open(void);
 static char *			lsp_read_manpage_name(void) lsp_attr_wur;
 static void *			lsp_realloc(void *, size_t) lsp_attr_alloc_size_1(2)
-							    lsp_attr_wur;
+								lsp_attr_wur;
 static bool			lsp_ref_is_valid(struct gref_t *);
 static void			lsp_remove_bs_from_string(char *);
 static void			lsp_wline_bw(int);
@@ -457,13 +457,13 @@ struct file_t {
 	pid_t child_pid;	/* Pid of child that feeds us data.
 				   0 if there isn't one (to wait() for). */
 
-	lsp_mode_t mode;      // mode of operation: TOC mode, search mode etc.
-	off_t getch_pos;      // next byte for getch() (0-based)
-	int unaligned;	      // != 0: getch_pos not aligned to buffers
+	lsp_mode_t mode;	// mode of operation: TOC mode, search mode etc.
+	off_t getch_pos;	// next byte for getch() (0-based)
+	int unaligned;		// != 0: getch_pos not aligned to buffers
 
-	char *name;	      // pathname
-	char *rep_name;	      // replacement name from preprocessor (if any)
-	char *neat_name;      // neat name for status line (only data from stdin)
+	char *name;		// pathname
+	char *rep_name;		// replacement name from preprocessor (if any)
+	char *neat_name;	// neat name for status line (only data from stdin)
 	/*
 	 * If we are a pipe to a preprocessor we read one byte to test if we
 	 * get data from it.  This byte gets stored here and we need to consume
@@ -479,19 +479,19 @@ struct file_t {
 	FILE *fp;
 	int fd;
 
-	off_t page_first;     // first byte in current page
-	off_t page_last;      // last byte in current page
+	off_t page_first;	// first byte in current page
+	off_t page_last;	// last byte in current page
 
-	size_t lines_count;   // number of lines in file -- so far
-	off_t *lines;	      // record the offsets of the lines in
-			      // the file.
-	size_t lines_size;    // current size of the above array
+	size_t lines_count;	// number of lines in file -- so far
+	off_t *lines;		// record the offsets of the lines in
+				// the file.
+	size_t lines_size;	// current size of the above array
 
-	off_t seek;	      // current position in file
-	off_t size;	      // size of the file
-	blksize_t blksize;    // preferred blksize to use
+	off_t seek;		// current position in file
+	off_t size;		// size of the file
+	blksize_t blksize;	// preferred blksize to use
 
-	struct data_t *data;  // content of the file that we already read
+	struct data_t *data;	// content of the file that we already read
 
 	struct file_t *prev;
 	struct file_t *next;
@@ -663,9 +663,9 @@ int	lsp_tab_width;
 unsigned char lsp_shift;
 
 /* xxx put into lsp_init() or so */
-char	*lsp_not_found = "Pattern not found";
-char    *lsp_reload_not_supported = "Reload not supported.";
-char	*lsp_content_reloaded = "File content reloaded.";
+char *lsp_not_found = "Pattern not found";
+char *lsp_reload_not_supported = "Reload not supported.";
+char *lsp_content_reloaded = "File content reloaded.";
 
 /* String from LSP_OPEN or LESSOPEN environment variable. */
 char *lsp_env_open;
