@@ -335,6 +335,7 @@ static void			lsp_init_hwin(void);
 #if DEBUG
 static void			lsp_init_logfile(void);
 #endif
+static regex_t *		lsp_init_preg(lsp_mode_t);
 static int			lsp_init_screen(void);
 static void			lsp_init_256_colors(void);
 static void			lsp_invalidate_cm_cursor(void);

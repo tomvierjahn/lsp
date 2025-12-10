@@ -3347,46 +3347,64 @@ static void lsp_man_id_dtor(struct man_id *m_id)
 }
 
 /*
+ * Prepare structure for regular expression compilation.
+ * Depending on the search mode this can be the one for references or for a
+ * search string.
+ * The structure for references should be initialized just once, because that
+ * expression is constant, whereas user's search strings are subject to change.
+ */
+static regex_t *lsp_init_preg(lsp_mode_t search_mode)
+{
+	regex_t *preg;
+
+	if (search_mode == LSP_REFS_MODE) {
+		assert(lsp_refs_regex == NULL);
+		lsp_refs_regex = lsp_calloc(1, sizeof(regex_t));
+		preg = lsp_refs_regex;
+	} else {
+		if (lsp_search_regex)
+			regfree(lsp_search_regex);
+		else
+			lsp_search_regex = lsp_calloc(1, sizeof(regex_t));
+		preg = lsp_search_regex;
+	}
+	return preg;
+}
+
+/*
  * Compile regular expression for search.
  *
  * Return NULL if successful, otherwise an error message.
  */
 static char *lsp_search_compile_regex(lsp_mode_t search_mode)
 {
+	int cflags = REG_EXTENDED;
 	int ret;
+	regex_t *preg = NULL;
+	char *search_string = lsp_search_ref_string;
 
-	if (search_mode == LSP_REFS_MODE) {
-		/* For references, we re-use the same regular expression.
-		   No need to compile it more than once. */
-		if (lsp_refs_regex == NULL) {
-			lsp_refs_regex = lsp_calloc(1, sizeof(regex_t));
-
-			ret = regcomp(lsp_refs_regex, lsp_search_ref_string, REG_EXTENDED);
-
-			/* No error handling here; we really should have a valid
-			   expression for refs in this program. */
-		}
-
-		/* In any case: return success. */
+	/*
+	 * Compile the regular expression for references just once.
+	 */
+	if (search_mode == LSP_REFS_MODE && lsp_refs_regex != NULL)
 		return NULL;
-	} else {
-		if (lsp_search_regex)
-			regfree(lsp_search_regex);
-		else
-			lsp_search_regex = lsp_calloc(1, sizeof(regex_t));
 
-		int cflags = REG_EXTENDED | REG_NEWLINE;
+	preg = lsp_init_preg(search_mode);
+
+	if (search_mode != LSP_REFS_MODE) {
+		cflags |= REG_NEWLINE;
 		if (!lsp_case_sensitivity)
 			cflags |= REG_ICASE;
-
-		ret = regcomp(lsp_search_regex, lsp_search_string, cflags);
+		search_string = lsp_search_string;
 	}
+
+	ret = regcomp(preg, search_string, cflags);
 
 	if (ret != 0) {
 		char *err_text;
-		size_t err_len = regerror(ret, lsp_search_regex, NULL, 0);
+		size_t err_len = regerror(ret, preg, NULL, 0);
 		err_text = lsp_malloc(err_len);
-		regerror(ret, lsp_search_regex, err_text, err_len);
+		regerror(ret, preg, err_text, err_len);
 		lsp_file_set_pos(cf->page_first);
 		return err_text;
 	}
@@ -3562,7 +3580,13 @@ static void lsp_cmd_search(bool get_string)
 
 static void lsp_cmd_search_refs()
 {
-	lsp_search_compile_regex(LSP_REFS_MODE);
+	char *reg_err_text;
+
+	reg_err_text = lsp_search_compile_regex(LSP_REFS_MODE);
+
+	if (reg_err_text)
+		lsp_error("%s: error in regular expression for references: %s",
+			  __func__, reg_err_text);
 
 	cf->regex_p = lsp_refs_regex;
 
@@ -6314,6 +6338,7 @@ static bool lsp_cm_cursor_is_valid()
 static void lsp_cmd_toggle_options()
 {
 	int cmd = wgetch(lsp_win);
+	char *reg_err_text;
 
 	switch(cmd) {
 	case 'h':
@@ -6329,8 +6354,13 @@ static void lsp_cmd_toggle_options()
 
 		/* If we are in a search the regular expression must be
 		   re-compiled. */
-		if (lsp_search_regex)
-			lsp_search_compile_regex(LSP_SEARCH_MODE);
+		if (lsp_search_regex) {
+			reg_err_text = lsp_search_compile_regex(LSP_SEARCH_MODE);
+			if (reg_err_text) {
+				lsp_prompt = "Toggling of case sensitivity failed.";
+				free(reg_err_text);
+			}
+		}
 
 		break;
 	case 'c':
