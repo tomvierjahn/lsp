@@ -54,6 +54,12 @@
 #  define lsp_attr_const
 #endif
 
+#if lsp_has_attribute(warn_unused_result)
+#  define lsp_attr_wur __attribute__ ((warn_unused_result))
+#else
+#  define lsp_attr_wur
+#endif
+
 /*
  * We store each file's content in a ring of buffers of size blksize.
  */
@@ -223,7 +229,8 @@ static int			lsp_argv_size(char **);
 static bool			lsp_basename_is_equal(const char *, const char *) lsp_attr_pure;
 static void			lsp_become_a_cat(char **) lsp_attr_noreturn;
 static size_t			lsp_buffer_free_size(void);
-static void *			lsp_calloc(size_t, size_t) lsp_attr_alloc_size_2(1, 2);
+static void *			lsp_calloc(size_t, size_t) lsp_attr_alloc_size_2(1, 2)
+							   lsp_attr_wur;
 static bool			lsp_cm_cursor_is_valid(void);
 static void			lsp_cmd_apropos(void);
 static void			lsp_cmd_backward(int);
@@ -246,7 +253,7 @@ static void			lsp_cmd_toggle_options(void);
 static void			lsp_cmd_visit_reference(void);
 static char *			lsp_cmd_select_file(void);
 static int			lsp_cmp_line_pos(size_t, off_t);
-static char**			lsp_create_man_argv(char *, char *);
+static char**			lsp_create_man_argv(char *, char *) lsp_attr_wur;
 static void			lsp_create_status_line(void);
 static void			lsp_cursor_care(void);
 static int			lsp_debug(const char *, ...);
@@ -257,9 +264,9 @@ static void			lsp_debug_buffer_dtor(void);
 static void			lsp_debug_buffer_print(void);
 #endif
 static size_t			lsp_decode_sgr(const char *, attr_t *, short *);
-static char *			lsp_detect_manpage(bool);
+static char *			lsp_detect_manpage(bool) lsp_attr_wur;
 static void			lsp_display_page(void);
-static char **			lsp_env2argv(char *);
+static char **			lsp_env2argv(char *) lsp_attr_wur;
 static int			lsp_error(const char *, ...) lsp_attr_noreturn;
 static int			lsp_expand_tab(size_t) lsp_attr_pure;
 static void			lsp_file_add(char *, bool);
@@ -268,15 +275,15 @@ static ssize_t			lsp_file_add_line(const char *);
 static void			lsp_file_align_buffer(void);
 static void			lsp_file_backward(int);
 static void			lsp_file_close(void);
-static struct file_t *		lsp_file_ctor(void);
+static struct file_t *		lsp_file_ctor(void) lsp_attr_wur;
 static void			lsp_file_data_ctor(size_t);
 static void			lsp_file_data_dtor(struct data_t *);
 static ssize_t			lsp_file_do_read(unsigned char *, size_t);
 static void			lsp_file_dtor(struct file_t *);
-static struct file_t *		lsp_file_find(char *);
+static struct file_t *		lsp_file_find(char *) lsp_attr_wur;
 static void			lsp_file_forward_empty_lines(size_t);
 static void			lsp_file_forward_words(size_t);
-static struct lsp_line_t *	lsp_file_get_prev_line(void);
+static struct lsp_line_t *	lsp_file_get_prev_line(void) lsp_attr_wur;
 static int			lsp_file_getch(char *);
 static void			lsp_file_init(void);
 static void			lsp_file_init_ring(void);
@@ -313,21 +320,21 @@ static void			lsp_file_ungetch(void);
 static void			lsp_finish(void) lsp_attr_noreturn;
 static size_t			lsp_fread(void *, size_t, size_t, FILE *);
 static short			lsp_get_color_pair(short, short);
-static struct gref_t *		lsp_get_gref_at_pos(regmatch_t);
-static struct lsp_line_t *	lsp_get_line_at_pos(off_t);
-static struct lsp_line_t *	lsp_get_line_from_here(void);
-static char *			lsp_get_neat_cmd_name(char **);
-static struct lsp_line_t *	lsp_get_next_display_line(void);
-static char *			lsp_get_parent_cmd_line(pid_t);
+static struct gref_t *		lsp_get_gref_at_pos(regmatch_t) lsp_attr_wur;
+static struct lsp_line_t *	lsp_get_line_at_pos(off_t) lsp_attr_wur;
+static struct lsp_line_t *	lsp_get_line_from_here(void) lsp_attr_wur;
+static char *			lsp_get_neat_cmd_name(char **) lsp_attr_wur;
+static struct lsp_line_t *	lsp_get_next_display_line(void) lsp_attr_wur;
+static char *			lsp_get_parent_cmd_line(pid_t) lsp_attr_wur;
 static size_t			lsp_get_sgr_len(const char *);
-static struct lsp_line_t *	lsp_get_this_line(void);
+static struct lsp_line_t *	lsp_get_this_line(void) lsp_attr_wur;
 static char			lsp_get_wc_cols(wchar_t *) lsp_attr_pure;
-static struct gref_t *		lsp_gref_find(char *);
+static struct gref_t *		lsp_gref_find(char *) lsp_attr_wur;
 static int			lsp_gref_henter(struct gref_t *);
 static void			lsp_goto_bol(void);
 static void			lsp_goto_last_wpage(void);
 static void			lsp_grefs_dtor(void);
-static struct gref_t *		lsp_gref_search(const char *);
+static struct gref_t *		lsp_gref_search(const char *) lsp_attr_wur;
 static bool			lsp_has_man_placeholders(const char *) lsp_attr_pure;
 static void			lsp_init(void);
 static void			lsp_init_cmd_input(void);
@@ -345,15 +352,16 @@ static bool			lsp_is_readable(char *);
 static bool			lsp_is_sgr_sequence(const char *);
 static void			lsp_line_add_wlines(struct lsp_line_t *);
 static size_t			lsp_line_count_words(struct lsp_line_t *) lsp_attr_pure;
-static struct lsp_line_t *	lsp_line_ctor(void);
+static struct lsp_line_t *	lsp_line_ctor(void) lsp_attr_wur;
 static void			lsp_line_cut_tail(struct lsp_line_t *, off_t);
 static void			lsp_line_dtor(struct lsp_line_t *);
 static int			lsp_line_handle_leading_sgr(attr_t *, short *);
 static size_t			lsp_line_get_matches(const struct lsp_line_t *, regmatch_t **);
 static regmatch_t		lsp_line_get_last_match(struct lsp_line_t **);
 static void			lsp_lines_add(off_t);
-static void *			lsp_malloc(size_t) lsp_attr_alloc_size_1(1);
-static char *			lsp_man_get_section(off_t);
+static void *			lsp_malloc(size_t) lsp_attr_alloc_size_1(1)
+						   lsp_attr_wur;
+static char *			lsp_man_get_section(off_t) lsp_attr_wur;
 static int			lsp_man_goto_section(char *);
 static struct man_id		lsp_man_id_ctor(const char *);
 static void			lsp_man_id_dtor(struct man_id *);
@@ -361,8 +369,8 @@ static void			lsp_man_reposition(char *);
 static void			lsp_mark_regular_file(void);
 static uint			lsp_mblen(const char *, size_t);
 static size_t			lsp_mbtowc(wchar_t *, const char *, size_t);
-static char *			lsp_mdup2str(const char *, size_t);
-static char *			lsp_mdup(const char *, size_t);
+static char *			lsp_mdup2str(const char *, size_t) lsp_attr_wur;
+static char *			lsp_mdup(const char *, size_t) lsp_attr_wur;
 static bool			lsp_mode_is_highlight(void);
 static bool			lsp_mode_is_refs(void);
 static bool			lsp_mode_is_search(void);
@@ -376,7 +384,7 @@ static void			lsp_mode_unset_highlight(void);
 static void			lsp_mode_unset_search_or_refs(void);
 static void			lsp_mode_unset_toc(void);
 static unsigned int		lsp_ndigits(unsigned int) lsp_attr_const;
-static char *			lsp_normalize(const char *, size_t, size_t*);
+static char *			lsp_normalize(const char *, size_t, size_t*) lsp_attr_wur;
 static size_t			lsp_normalize_count(const char *, size_t, size_t);
 static void			lsp_open_cterm(void);
 static int			lsp_open_file(const char *);
@@ -404,8 +412,9 @@ static bool			lsp_pos_is_toc(off_t);
 static void			lsp_print_argv(char **);
 #endif
 static void			lsp_process_env_open(void);
-static char *			lsp_read_manpage_name(void);
-static void *			lsp_realloc(void *, size_t) lsp_attr_alloc_size_1(2);
+static char *			lsp_read_manpage_name(void) lsp_attr_wur;
+static void *			lsp_realloc(void *, size_t) lsp_attr_alloc_size_1(2)
+							    lsp_attr_wur;
 static bool			lsp_ref_is_valid(struct gref_t *);
 static void			lsp_remove_bs_from_string(char *);
 static void			lsp_wline_bw(int);
@@ -413,7 +422,7 @@ static void			lsp_wline_fw(int);
 static void			lsp_search_align_page_to_match(void);
 static void			lsp_search_align_toc_to_match(void);
 static void			lsp_search_align_to_match(int);
-static char *			lsp_search_compile_regex(lsp_mode_t);
+static char *			lsp_search_compile_regex(lsp_mode_t) lsp_attr_wur;
 static regmatch_t		lsp_search_next(void);
 static void			lsp_set_cloexec(int);
 static void			lsp_set_no_current_match(void);
@@ -423,9 +432,9 @@ static size_t			lsp_skip_bsp(const char *, size_t);
 static size_t			lsp_skip_sgr(const char *, size_t);
 static size_t			lsp_skip_to_payload(const char *, size_t);
 static void			lsp_start_feeder(lsp_feeder_t);
-static char **			lsp_str2argv(const char *);
+static char **			lsp_str2argv(const char *) lsp_attr_wur;
 static void			lsp_to_lower(char *);
-static struct toc_node_t *	lsp_pos_to_toc(off_t);
+static struct toc_node_t *	lsp_pos_to_toc(off_t) lsp_attr_wur;
 static void			lsp_toc_bw(size_t);
 static void			lsp_toc_ctor(void);
 static void			lsp_toc_dtor(struct file_t *);
